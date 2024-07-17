@@ -32,7 +32,7 @@ The Advanced Vulnerability Scanner Dashboard is a web-based application that pro
 ## Installation
 
 1. Clone the repository:
-git clone https://github.com/yourusername/advanced-vulnerability-scanner.git
+git clone https://github.com/Tushar4059x/cybersecurity-dashboard
 cd advanced-vulnerability-scanner
 Copy
 2. Install the required Python packages:
