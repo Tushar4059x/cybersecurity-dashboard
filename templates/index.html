@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Vulnerability Scanner Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center text-blue-600">Advanced Vulnerability Scanner Dashboard</h1>
+        
+        <div class="mb-8">
+            <input type="text" id="urlInput" placeholder="Enter website URL" class="w-full p-2 border rounded">
+            <button onclick="scanWebsite()" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Scan</button>
+        </div>
+        
+        <div id="loadingIndicator" class="hidden">
+            <p class="text-center text-xl">Scanning in progress... This may take a few minutes.</p>
+        </div>
+        
+        <div id="dashboard" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold mb-4">Total Vulnerabilities</h2>
+                    <p id="totalVulnerabilities" class="text-4xl font-bold text-red-500"></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold mb-4">Scanned URL</h2>
+                    <p id="scannedUrl" class="text-lg"></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold mb-4">Last Scan</h2>
+                    <p id="lastScanTime" class="text-lg"></p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold mb-4">Severity Distribution</h2>
+                    <div class="chart-container">
+                        <canvas id="severityDistributionChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold mb-4">Vulnerability Types</h2>
+                    <div class="chart-container">
+                        <canvas id="vulnerabilityTypesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold mb-4">Vulnerability Trend</h2>
+                    <div class="chart-container">
+                        <canvas id="vulnerabilityTrendChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold mb-4">Time to Fix Trend</h2>
+                    <div class="chart-container">
+                        <canvas id="timeToFixChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold mb-4">Top Vulnerable Pages</h2>
+                    <ul id="topVulnerablePages" class="list-disc pl-5"></ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-semibold mb-4">Recent Scans</h2>
+                    <ul id="recentScans" class="list-disc pl-5"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let charts = {};
+
+        async function scanWebsite() {
+            const url = document.getElementById('urlInput').value;
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+
+            try {
+                const response = await fetch('/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url }),
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    updateDashboard(result.data);
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                document.getElementById('loadingIndicator').classList.add('hidden');
+            }
+        }
+
+        function updateDashboard(data) {
+            document.getElementById('dashboard').classList.remove('hidden');
+            
+            document.getElementById('totalVulnerabilities').textContent = data.totalVulnerabilities;
+            document.getElementById('scannedUrl').textContent = data.url;
+            document.getElementById('lastScanTime').textContent = new Date().toLocaleString();
+            
+            updateSeverityDistributionChart(data.severityDistribution);
+            updateVulnerabilityTypesChart(data.vulnerabilityTypes);
+            updateVulnerabilityTrendChart(data.vulnerabilityTrend);
+            updateTimeToFixChart(data.timeToFix);
+            updateTopVulnerablePages(data.topVulnerablePages);
+            updateRecentScans(data.recentScans);
+        }
+
+        function updateSeverityDistributionChart(data) {
+            createOrUpdateChart('severityDistributionChart', {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(data),
+                    datasets: [{
+                        data: Object.values(data),
+                        backgroundColor: ['#DC2626', '#F59E0B', '#10B981', '#3B82F6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateVulnerabilityTypesChart(data) {
+            createOrUpdateChart('vulnerabilityTypesChart', {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data),
+                    datasets: [{
+                        label: 'Number of Vulnerabilities',
+                        data: Object.values(data),
+                        backgroundColor: '#60A5FA'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateVulnerabilityTrendChart(data) {
+            createOrUpdateChart('vulnerabilityTrendChart', {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Vulnerabilities',
+                        data: data.counts,
+                        borderColor: '#10B981',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTimeToFixChart(data) {
+            createOrUpdateChart('timeToFixChart', {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Average Time to Fix (days)',
+                        data: data.averageTimes,
+                        borderColor: '#F59E0B',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTopVulnerablePages(pages) {
+            const list = document.getElementById('topVulnerablePages');
+            list.innerHTML = '';
+            pages.forEach(page => {
+                const li = document.createElement('li');
+                li.textContent = `${page.url} (${page.count} vulnerabilities)`;
+                list.appendChild(li);
+            });
+        }
+
+        function updateRecentScans(scans) {
+            const list = document.getElementById('recentScans');
+            list.innerHTML = '';
+            scans.forEach(scan => {
+                const li = document.createElement('li');
+                li.textContent = `${scan.url} - ${scan.totalVulnerabilities} vulnerabilities (${new Date(scan.timestamp).toLocaleString()})`;
+                list.appendChild(li);
+            });
+        }
+
+        function createOrUpdateChart(id, config) {
+            const ctx = document.getElementById(id).getContext('2d');
+            if (charts[id]) {
+                charts[id].destroy();
+            }
+            charts[id] = new Chart(ctx, config);
+        }
+    </script>
+</body>
+</html>
