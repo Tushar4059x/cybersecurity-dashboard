@@ -79,10 +79,6 @@ This tool is for educational and authorized testing purposes only. Always ensure
 
 Contributions to improve the Advanced Vulnerability Scanner Dashboard are welcome. Please feel free to submit pull requests or open issues to suggest improvements or report bugs.
 
-## License
-
-[MIT License](LICENSE)
-
 ## Disclaimer
 
 This tool is provided as-is, without any warranties. The developers are not responsible for any misuse or damage caused by this tool. Use responsibly and ethically.
