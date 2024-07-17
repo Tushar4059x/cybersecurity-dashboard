@@ -32,12 +32,12 @@ The Advanced Vulnerability Scanner Dashboard is a web-based application that pro
 ## Installation
 
 1. Clone the repository:
-git clone https://github.com/Tushar4059x/cybersecurity-dashboard
-cd advanced-vulnerability-scanner
-Copy
+    git clone https://github.com/yourusername/advanced-vulnerability-scanner.git
+    cd advanced-vulnerability-scanner
+
 2. Install the required Python packages:
-pip install flask python-owasp-zap-v2.4
-Copy
+    pip install flask python-owasp-zap-v2.4
+
 3. Install and set up OWASP ZAP:
 - Download ZAP from [https://www.zaproxy.org/download/](https://www.zaproxy.org/download/)
 - Follow the installation instructions for your operating system
@@ -50,8 +50,8 @@ Copy
 ## Usage
 
 1. Start the Flask application:
-python app.py
-Copy
+    python app.py
+
 2. Open a web browser and navigate to `http://localhost:5000`
 
 3. Enter the URL of the website you want to scan in the input field.
@@ -87,4 +87,3 @@ Contributions to improve the Advanced Vulnerability Scanner Dashboard are welcom
 ## Disclaimer
 
 This tool is provided as-is, without any warranties. The developers are not responsible for any misuse or damage caused by this tool. Use responsibly and ethically.
-This README provides a comprehensive overview of your project, including its features, installation instructions, usage guide, and important disclaimers. You may want to adjust some details (like the GitHub repository URL) to match your specific project setup. Also, consider adding a LICENSE file to your project if you haven't already, and link to it in the README as shown above.
